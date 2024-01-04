@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-"use strict";
+const chai = require('chai');
+const { wrapSequelize } = require('../index');
+const { makeMinimalUsefulStacktrace } = require('../util');
 
-const { wrapSequelize } = require('./index');
-const chai = require("chai");
-const {makeMinimalUsefulStacktrace} = require("./util");
 const expect = chai.expect;
 
 const createFakeSequelize = () => {
@@ -29,7 +28,8 @@ const createFakeSequelize = () => {
                     },
                     sequelize: {
                         config: {
-                            database: 'fake', client: 'fakesql',
+                            database: 'fake',
+                            client: 'fakesql',
                         },
                         options: {
                             databaseVersion: 'fakesql-server:0.0.X',
@@ -41,20 +41,21 @@ const createFakeSequelize = () => {
             },
         },
     };
-}
+};
 
-describe("Comments for Sequelize", () => {
-
+describe('Comments for Sequelize', () => {
     const fakeSequelize = createFakeSequelize();
 
     before(() => {
         wrapSequelize(fakeSequelize);
     });
 
-    describe("Cases", () => {
-
-        it("should add comment to generated sql", (done) => {
-            const want = `SELECT * FROM foo /*stacktrace='${makeMinimalUsefulStacktrace()}'*/`;
+    describe('Cases', () => {
+        it('should add comment to generated sql', (done) => {
+            const want = `SELECT * FROM foo /*stacktrace='${makeMinimalUsefulStacktrace().replace(
+                /[^\w.:/\\\-\s\n]/g,
+                '',
+            )}'*/`;
             const query = 'SELECT * FROM foo';
 
             fakeSequelize.dialect.Query.prototype.run(query).then((sql) => {
@@ -64,16 +65,15 @@ describe("Comments for Sequelize", () => {
             done();
         });
 
-        it("should NOT affix comments to statements with existing comments", (done) => {
-
+        it('should NOT affix comments to statements with existing comments', (done) => {
             const q = [
                 'SELECT * FROM people /* existing */',
-                'SELECT * FROM people -- existing'
+                'SELECT * FROM people -- existing',
             ];
 
             Promise.all([
                 fakeSequelize.dialect.Query.prototype.run(q[0]),
-                fakeSequelize.dialect.Query.prototype.run(q[1])
+                fakeSequelize.dialect.Query.prototype.run(q[1]),
             ]).then(([a, b]) => {
                 expect(a).to.equal(q[0]);
                 expect(b).to.equal(q[1]);
@@ -82,17 +82,19 @@ describe("Comments for Sequelize", () => {
             done();
         });
 
-        it("chaining and repeated calls should NOT indefinitely chain SQL", (done) => {
+        it('chaining and repeated calls should NOT indefinitely chain SQL', (done) => {
             const sql = 'SELECT * FROM foo';
 
-            fakeSequelize.dialect.Query.prototype.run(sql)
+            fakeSequelize.dialect.Query.prototype
+                .run(sql)
                 .then((a) => fakeSequelize.dialect.Query.prototype.run(a))
                 .then((b) => fakeSequelize.dialect.Query.prototype.run(b))
                 .then((c) => fakeSequelize.dialect.Query.prototype.run(c))
                 .then((d) => {
                     expect(d.match(/\/\*/g) ?? []).to.have.length(1);
                     expect(d.match(/SELECT \* FROM foo/g) ?? []).to.have.length(1);
-                }).then(done, done);
+                })
+                .then(done, done);
         });
     });
 });

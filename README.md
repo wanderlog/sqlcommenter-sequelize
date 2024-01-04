@@ -15,5 +15,9 @@ yarn add wanderlog/sqlcommenter-sequelize
 
 ### Usage
 ```javascript
-const ssequelize = require('wanderlog/sqlcommenter-sequelize');
+const Sequelize = requrie('sequelize');
+const {wrapSequelize} = require('wanderlog/sqlcommenter-sequelize');
+
+const db = new Sequelize({...});
+wrapSequelize(db);
 ```
