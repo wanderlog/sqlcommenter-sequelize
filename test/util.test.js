@@ -14,7 +14,7 @@
 
 "use strict";
 
-const { hasComment, makeMinimalUsefulStacktrace } = require('./util');
+const { hasComment, makeMinimalUsefulStacktrace } = require('../util');
 const chai = require("chai");
 const expect = chai.expect;
 
@@ -53,12 +53,6 @@ describe("Unit", () => {
     });
 
     describe("makeMinimalUsefulStacktrace", () => {
-
-        it("should only include permitted characters", () => {
-            const stacktrace = makeMinimalUsefulStacktrace();
-            expect(stacktrace).to.equal(stacktrace.replace(/[^\w.:/\\\-\s\n]/g, ''))
-        });
-
         it("should only contain about 4 lines of context", () => {
             expect(makeMinimalUsefulStacktrace().match(/\n/g) || []).to.have.length(3);
         });

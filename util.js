@@ -50,7 +50,7 @@ exports.makeMinimalUsefulStacktrace = () => {
     // Most Sequelize queries contain something of the form "at Function.{query}",
     // e.g. "at Function.findAll". This is a hint to help us find useful
     // context.
-    const indexOfUsefulInfoForQuery = stacktrace.lastIndexOf('at Function.');
+    const indexOfUsefulInfoForQuery = stacktrace.lastIndexOf('node_modules/');
     let minimalUsefulStacktrace = stacktrace.slice(
         indexOfUsefulInfoForQuery >= 0
             ? indexOfUsefulInfoForQuery
@@ -64,7 +64,5 @@ exports.makeMinimalUsefulStacktrace = () => {
         .map((stackLine) => stackLine.trim())
         .join('\n');
 
-    // Allow only alphanumeric, periods, slashes, dashes, underscores,
-    // spaces, newlines.
-    return minimalUsefulStacktrace.replace(/[^\w.:/\\\-\s\n]/g, '');
+    return minimalUsefulStacktrace;
 }
