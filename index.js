@@ -50,7 +50,7 @@ exports.wrapSequelize = (sequelize) => {
         // Allow only alphanumeric, periods, slashes, dashes, underscores,
         // spaces, newlines. The main concern is preventing injection of '*/
         // within the stacktrace.
-        const commentStr = `stacktrace='${makeMinimalUsefulStacktrace()}'`.replace(/[^\w.:/\\\-\s\n]/g, '');
+        const commentStr = `stacktrace='${makeMinimalUsefulStacktrace().replace(/[^\w.:/\\\-\s\n]/g, '')}'`;
 
         if (commentStr && commentStr.length > 0)
             sql = `${sql} /*${commentStr}*/`;
