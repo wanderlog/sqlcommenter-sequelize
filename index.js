@@ -50,10 +50,15 @@ exports.wrapSequelize = (sequelize) => {
         // Allow only alphanumeric, periods, slashes, dashes, underscores,
         // spaces, newlines. The main concern is preventing injection of '*/
         // within the stacktrace.
-        const commentStr = `stacktrace='${makeMinimalUsefulStacktrace().replace(/[^\w.:/\\\-\s\n]/g, '')}'`;
+        //
+        // We also don't include any quotes with the stacktrace because
+        // mysqldumpslow (which aggregates slow query logs) by default replaces
+        // all strings with quotes with 'S'. We don't want that, since we want
+        // to see stacktraces in our slow query logs.
+        const commentStr = `stacktrace=\n${makeMinimalUsefulStacktrace().replace(/[^\w.:/\\\-\s\n]/g, '')}`;
 
         if (commentStr && commentStr.length > 0)
-            sql = `${sql} /*${commentStr}*/`;
+            sql = `${sql} /* ${commentStr} */`;
 
         return run.apply(this, [sql, sql_options]);
     };

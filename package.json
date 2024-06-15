@@ -1,6 +1,6 @@
 {
   "name": "sqlcommenter-sequelize",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Middleware and wrappers to correlate SQL statements from Sequelize.js",
   "main": "index.js",
   "directories": {
