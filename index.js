@@ -55,7 +55,7 @@ exports.wrapSequelize = (sequelize) => {
         // mysqldumpslow (which aggregates slow query logs) by default replaces
         // all strings with quotes with 'S'. We don't want that, since we want
         // to see stacktraces in our slow query logs.
-        const commentStr = `stacktrace=\n${makeMinimalUsefulStacktrace().replace(/[^\w.:/\\\-\s\n]/g, '')}`;
+        const commentStr = `stacktrace=\n${makeMinimalUsefulStacktrace(new Error().stack ?? 'stacktrace not defined').replace(/[^\w.:/\\\-\s\n]/g, '')}`;
 
         if (commentStr && commentStr.length > 0)
             sql = `${sql} /* ${commentStr} */`;

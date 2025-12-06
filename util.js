@@ -44,9 +44,7 @@ exports.hasComment = (sql) => {
  * Create a stacktrace summary context useful for figuring out where
  * Sequelize queries originate.
  */
-exports.makeMinimalUsefulStacktrace = () => {
-    const stacktrace = (new Error().stack ?? 'stack trace not defined');
-
+exports.makeMinimalUsefulStacktrace = (stacktrace) => {
     // Most Sequelize queries contain something of the form "at Function.{query}",
     // e.g. "at Function.findAll". This is a hint to help us find useful
     // context.
