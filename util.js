@@ -45,24 +45,37 @@ exports.hasComment = (sql) => {
  * Sequelize queries originate.
  */
 exports.makeMinimalUsefulStacktrace = () => {
-    const stacktrace = new Error().stack;
+    const stacktrace = (new Error().stack ?? 'stack trace not defined');
 
     // Most Sequelize queries contain something of the form "at Function.{query}",
     // e.g. "at Function.findAll". This is a hint to help us find useful
     // context.
     const indexOfUsefulInfoForQuery = stacktrace.lastIndexOf('node_modules/');
-    let minimalUsefulStacktrace = stacktrace.slice(
-        indexOfUsefulInfoForQuery >= 0
-            ? indexOfUsefulInfoForQuery
-            : stacktrace.indexOf('at'),
-    );
+    // Find the index of the 'at' keyword. This is typically used 
+    const indexOfAt = stacktrace.indexOf('at');
+    let minimalUsefulStacktrace = stacktrace;
 
-    // Only get about 4 lines of context
-    minimalUsefulStacktrace = minimalUsefulStacktrace
-        .split('\n')
-        .slice(1, 5)
-        .map((stackLine) => stackLine.trim())
-        .join('\n');
+    if (indexOfUsefulInfoForQuery >= 0) {
+        minimalUsefulStacktrace = stacktrace.slice(indexOfUsefulInfoForQuery);
+    } else if (indexOfAt >= 0) {
+        minimalUsefulStacktrace = stacktrace.slice(indexOfAt);
+    }
+
+    // If the minimal useful stacktrace is shorter than the original stacktrace,
+    // it means the trace is likely in V8 format. We can safely truncate without
+    // losing too much context.
+
+    // If we couldn't find a useful truncation point, we should just keep the 
+    // whole stacktrace to avoid losing too much context and iterate on this 
+    // utility how to better handle exceptions.
+    if (minimalUsefulStacktrace.length < stacktrace.length) {
+        // Only get about 4 lines of context
+        minimalUsefulStacktrace = minimalUsefulStacktrace
+            .split('\n')
+            .slice(1, 5)
+            .map((stackLine) => stackLine.trim())
+            .join('\n');
+    }
 
     return minimalUsefulStacktrace;
 }
